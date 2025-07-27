@@ -8,6 +8,7 @@ from db import db
 from routes.auth import auth_bp
 from routes.study_guide import guide_bp
 from routes.quiz import quiz_bp
+from routes.progress import progress_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -28,6 +29,7 @@ CORS(
 app.register_blueprint(auth_bp)
 app.register_blueprint(guide_bp)
 app.register_blueprint(quiz_bp)
+app.register_blueprint(progress_bp)  
 
 @app.route("/")
 def index():
