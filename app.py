@@ -11,6 +11,7 @@ from routes.quiz import quiz_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.config['JWT_VERIFY_SUB'] = False
 
 # Initialize extensions
 db.init_app(app)

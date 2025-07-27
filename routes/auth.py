@@ -10,19 +10,18 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 ADMIN_EMAIL = "admin@serenite.com"
 ADMIN_PASSWORD = "admin123"
 
-# ✅ Login route
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
 
-    # 🔐 Check hardcoded admin
+    # 🔐 Admin login
     if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
         token = create_access_token(identity={"email": email, "role": "admin"})
         return jsonify({"token": token, "email": email, "role": "admin"}), 200
 
-    # ✅ Check DB user
+    # ✅ User login
     user = User.query.filter_by(email=email, password=password).first()
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
@@ -31,7 +30,6 @@ def login():
 
     token = create_access_token(identity={"email": user.email, "role": user.role})
     return jsonify({"token": token, "email": user.email, "role": user.role}), 200
-
 
 # ✅ Get current user info
 @auth_bp.route("/me", methods=["GET"])
