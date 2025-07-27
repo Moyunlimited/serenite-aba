@@ -19,11 +19,10 @@ db.init_app(app)
 jwt = JWTManager(app)  # ✅ assign to a variable (not required but standard)
 
 # ✅ Proper CORS setup
-CORS(
-    app,
-    supports_credentials=True,
-    origins=["http://localhost:5173"],  # This must be a list, not a string
-)
+CORS(app, supports_credentials=True, origins=[
+    "http://localhost:5173",
+    "https://serenite-aba-front-c7xn.vercel.app",  # ✅ Your Vercel frontend
+])
 
 # Register routes
 app.register_blueprint(auth_bp)
