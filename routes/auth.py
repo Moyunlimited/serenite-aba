@@ -6,40 +6,36 @@ from models.pending_user import PendingUser
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
-# ✅ Hardcoded admin credentials
-ADMIN_EMAIL = "admin@serenite.com"
-ADMIN_PASSWORD = "admin123"
-
+# ✅ Login Route (Admin + User)
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
 
-    # 🔐 Admin login
-    if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
-        token = create_access_token(identity={"email": email, "role": "admin"})
-        return jsonify({"token": token, "email": email, "role": "admin"}), 200
-
-    # ✅ User login
     user = User.query.filter_by(email=email, password=password).first()
+
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
+
+    if user.role == "admin":
+        token = create_access_token(identity={"email": user.email, "role": "admin"})
+        return jsonify({"token": token, "email": user.email, "role": "admin"}), 200
+
     if not user.approved:
         return jsonify({"error": "Account not approved by admin yet"}), 403
 
-    token = create_access_token(identity={"email": user.email, "role": user.role})
-    return jsonify({"token": token, "email": user.email, "role": user.role}), 200
+    token = create_access_token(identity={"email": user.email, "role": "user"})
+    return jsonify({"token": token, "email": user.email, "role": "user"}), 200
 
-# ✅ Get current user info
+# ✅ Get current logged-in user
 @auth_bp.route("/me", methods=["GET"])
 @jwt_required()
 def me():
     identity = get_jwt_identity()
     return jsonify(identity), 200
 
-
-# ✅ Signup route (adds to pending user list)
+# ✅ Signup route (user must be approved by admin)
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json()
@@ -58,8 +54,7 @@ def signup():
     db.session.commit()
     return jsonify({"msg": "Signup submitted. Await admin approval."}), 200
 
-
-# ✅ Admin-only route: list all pending users
+# ✅ Admin-only: view pending users
 @auth_bp.route("/pending-users", methods=["GET"])
 @jwt_required()
 def get_pending_users():
@@ -76,8 +71,7 @@ def get_pending_users():
         } for u in users
     ]), 200
 
-
-# ✅ Admin-only route: approve a pending user
+# ✅ Admin-only: approve a pending user
 @auth_bp.route("/approve-user/<int:user_id>", methods=["POST"])
 @jwt_required()
 def approve_user(user_id):
@@ -89,7 +83,6 @@ def approve_user(user_id):
     if not pending:
         return jsonify({"msg": "User not found"}), 404
 
-    # Move to real User model
     new_user = User(
         full_name=pending.full_name,
         email=pending.email,
