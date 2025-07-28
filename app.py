@@ -21,7 +21,7 @@ jwt = JWTManager(app)  # ✅ assign to a variable (not required but standard)
 # ✅ Proper CORS setup
 CORS(app, supports_credentials=True, origins=[
     "http://localhost:5173",
-    "https://serenite-aba-front-c7xn.vercel.app",  # ✅ Your Vercel frontend
+    "https://sereniteaba.com",  # ✅ Your Vercel frontend
 ])
 
 # Register routes
