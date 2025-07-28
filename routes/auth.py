@@ -34,6 +34,13 @@ def login():
         return jsonify({"error": "Server error occurred during login"}), 500
 
 
+# ✅ Get current logged-in user
+@auth_bp.route("/me", methods=["GET"])
+@jwt_required()
+def me():
+    identity = get_jwt_identity()
+    return jsonify(identity), 200
+
 # ✅ Signup route (user must be approved by admin)
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
