@@ -6,5 +6,5 @@ class Config:
     JWT_HEADER_NAME = "Authorization"
     JWT_HEADER_TYPE = "Bearer"  # ✅ Must match frontend header
 
-    SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
+    SQLALCHEMY_DATABASE_URI = "sqlite:////mnt/data/data.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
