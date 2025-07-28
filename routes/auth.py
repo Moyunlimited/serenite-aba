@@ -9,31 +9,30 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 # ✅ Login Route (Admin + User)
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
-    email = data.get("email", "").strip().lower()  # Normalize email
-    password = data.get("password")
+    try:
+        data = request.get_json()
+        email = data.get("email", "").strip().lower()
+        password = data.get("password")
 
-    user = User.query.filter_by(email=email, password=password).first()
+        user = User.query.filter_by(email=email, password=password).first()
 
-    if not user:
-        return jsonify({"error": "Invalid credentials"}), 401
+        if not user:
+            return jsonify({"error": "Invalid credentials"}), 401
 
-    if user.role == "admin":
-        token = create_access_token(identity={"email": user.email, "role": "admin"})
-        return jsonify({"token": token, "email": user.email, "role": "admin"}), 200
+        if user.role == "admin":
+            token = create_access_token(identity={"email": user.email, "role": "admin"})
+            return jsonify({"token": token, "email": user.email, "role": "admin"}), 200
 
-    if not user.approved:
-        return jsonify({"error": "Account not approved by admin yet"}), 403
+        if not user.approved:
+            return jsonify({"error": "Account not approved by admin yet"}), 403
 
-    token = create_access_token(identity={"email": user.email, "role": "user"})
-    return jsonify({"token": token, "email": user.email, "role": "user"}), 200
+        token = create_access_token(identity={"email": user.email, "role": "user"})
+        return jsonify({"token": token, "email": user.email, "role": "user"}), 200
 
-# ✅ Get current logged-in user
-@auth_bp.route("/me", methods=["GET"])
-@jwt_required()
-def me():
-    identity = get_jwt_identity()
-    return jsonify(identity), 200
+    except Exception as e:
+        print("LOGIN ERROR:", e)
+        return jsonify({"error": "Server error occurred during login"}), 500
+
 
 # ✅ Signup route (user must be approved by admin)
 @auth_bp.route("/signup", methods=["POST"])
