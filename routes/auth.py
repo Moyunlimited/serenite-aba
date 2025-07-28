@@ -10,7 +10,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    email = data.get("email")
+    email = data.get("email", "").strip().lower()  # Normalize email
     password = data.get("password")
 
     user = User.query.filter_by(email=email, password=password).first()
@@ -39,7 +39,7 @@ def me():
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json()
-    email = data.get("email")
+    email = data.get("email", "").strip().lower()  # Normalize email
     password = data.get("password")
     full_name = data.get("full_name")
 
